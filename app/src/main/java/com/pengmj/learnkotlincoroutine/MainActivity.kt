@@ -7,10 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.pengmj.learnkotlincoroutine.example01.Example01ProgramEntry
 import com.pengmj.learnkotlincoroutine.ui.theme.LearnKotlinCoroutineTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,29 +20,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             LearnKotlinCoroutineTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                            name = "Android", modifier = Modifier.padding(innerPadding)
-                    )
+                    Example01ProgramEntry(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(
-    name: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-            text = "Hello $name!", modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     LearnKotlinCoroutineTheme {
-        Greeting("Android")
+        Example01ProgramEntry()
     }
 }
