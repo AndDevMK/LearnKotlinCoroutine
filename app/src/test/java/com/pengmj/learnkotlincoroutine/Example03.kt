@@ -3,13 +3,16 @@ package com.pengmj.learnkotlincoroutine
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.filter
@@ -26,6 +29,8 @@ import kotlinx.coroutines.flow.reduce
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.zip
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Test
@@ -300,5 +305,71 @@ class Example03 {
         catch (e: Exception) {
             println("捕获下游异常: $e")
         }
+    }
+
+    /**
+     * Flow是冷流，与之相对的是热流，StateFlow 和 SharedFlow 是热流，在垃圾回收之前，都是存在内存之中，并且处于活跃状态的
+     *
+     * StateFlow类似于LiveData
+     */
+    @Test
+    fun `StateFlow`() = runBlocking {
+
+        val stateFlow = MutableStateFlow<Int>(0)
+
+        val job1 = GlobalScope.launch {
+            while (true) {
+                delay(1000)
+                stateFlow.value++
+                println("执行了+1")
+            }
+        }
+
+        val job2 = GlobalScope.launch {
+            while (true) {
+                delay(3000)
+                stateFlow.value--
+                println("执行了-1")
+            }
+        }
+
+        val job3 = GlobalScope.launch {
+            stateFlow.collect {
+                println("value: $it")
+            }
+        }
+
+        joinAll(job1, job2, job3)
+    }
+
+    /**
+     * Flow是冷流，与之相对的是热流，StateFlow 和 SharedFlow 是热流，在垃圾回收之前，都是存在内存之中，并且处于活跃状态的
+     *
+     * StaredFlow类似于BroadcastChannel
+     */
+    @Test
+    fun `StaredFlow`() = runBlocking {
+        val sharedFlow = MutableStateFlow<Long>(0L)
+
+        val job1 = GlobalScope.launch {
+            while (true) {
+                delay(1000)
+                sharedFlow.emit(System.currentTimeMillis())
+            }
+        }
+
+        val job2 = GlobalScope.launch {
+            sharedFlow.collect{
+                println("job2 value: $it")
+            }
+        }
+
+        val job3 = GlobalScope.launch {
+            sharedFlow.collect{
+                println("job3 value: $it")
+            }
+        }
+
+        joinAll(job1, job2, job3)
     }
 }
